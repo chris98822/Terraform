@@ -20,6 +20,23 @@ output "vpc_id" {
 #
 # NAT Instance
 #
+
+resource "aws_eip" "nat" {
+  #instance = "${aws_instance.nat.id}"
+  vpc = true
+  depends_on = ["aws_internet_gateway.default"]
+}
+
+
+ resource "aws_nat_gateway" "nat" {
+  allocation_id = "${aws_eip.nat.id}"
+  subnet_id     = "${aws_subnet.demo_public.id}"
+ tags {
+   Name = "terraform_nat_gateway"
+ }
+}
+
+/*
 resource "aws_instance" "nat" {
   ami = "ami-75ae8245" # this is a special ami preconfigured to do NAT
   availability_zone = "${element(var.availability_zones, 0)}"
@@ -33,11 +50,8 @@ resource "aws_instance" "nat" {
       Name = "terraform_nat_instance"
   }
 }
+*/
 
-resource "aws_eip" "nat" {
-  instance = "${aws_instance.nat.id}"
-  vpc = true
-}
 
 
 # Public
@@ -87,7 +101,7 @@ resource "aws_route_table" "demo_private" {
   vpc_id = "${aws_vpc.default.id}"
   route {
       cidr_block = "0.0.0.0/0"
-      instance_id = "${aws_instance.nat.id}"
+      nat_gateway_id = "${aws_nat_gateway.nat.id}"
   }
   tags {
       Name = "terraform_private_subnet_route_table"
