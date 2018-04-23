@@ -11,7 +11,10 @@ resource "aws_instance" "bastion" {
   key_name = "${var.key_name}"
 }
 
+/*
 resource "aws_eip" "bastion" {
   instance = "${aws_instance.bastion.id}"
   vpc = true
 }
+
+*/
