@@ -4,7 +4,7 @@ variable "region" {
 }
 variable "key_name" {}
 variable "instance_type" {
-  default = "t2.nano"
+  default = "t2.micro"
 }
 # Amazon Linux AMI
 variable "amis" {
