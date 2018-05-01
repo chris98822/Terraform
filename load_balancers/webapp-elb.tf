@@ -1,7 +1,13 @@
 
+data "aws_subnet_ids" "public" {
+	vpc_id = "${var.vpc_id}"
+	tags {
+		tier = "public"
+	}
+}
 resource "aws_elb" "webapp_elb" {
   name = "demo-webapp-elb"
-  subnets = ["${var.public_subnet_id}"]
+  subnets = ["${data.aws_subnet_ids.public.ids}"]
   listener {
     instance_port = 80
     instance_protocol = "http"
