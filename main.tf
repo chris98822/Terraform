@@ -1,4 +1,4 @@
-
+/*
 provider "aws" {
   region = "${var.region}"
 }
@@ -7,7 +7,8 @@ module "site" {
   key_name = "${var.key_name}"
   ip_range = "${var.ip_range}"
 }
-/*module "launch_configurations" {
+*/
+module "launch_configurations" {
   source = "./launch_configurations"
   webapp_http_inbound_sg_id = "${module.site.webapp_http_inbound_sg_id}"
   webapp_ssh_inbound_sg_id = "${module.site.webapp_ssh_inbound_sg_id}"
@@ -35,4 +36,4 @@ module "instances" {
   web_nat = "${module.site.web_nat}"
   key_name = "${var.key_name}"
 }
-*/
+

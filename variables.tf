@@ -1,4 +1,12 @@
 
+name = "REMAX-SANDBOX"
+  
+tags = {
+  Owner       = "REMAX"
+  Environment = "Sandbox"
+  Name        = "REMAXIMUS"
+}
+
 variable "region" {
   default = "us-west-2"
 }
