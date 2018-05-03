@@ -5,7 +5,7 @@ resource "aws_security_group" "vpn_allow" {
     from_port = 0
     to_port = 0
     protocol = "-1"
-    security_group_id = "${aws_security_group.vpn_sg.id}"
+    security_group_id = "${output.vpn_sg_id.id}"
   }
   vpc_id = "${aws_vpc.default.id}"
   tags {
