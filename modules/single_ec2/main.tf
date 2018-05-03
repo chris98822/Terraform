@@ -1,18 +1,9 @@
 resource "template_file" "user_data" {
   template = <<EOF
 #!/bin/bash
-wget https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb
-dpkg -i puppetlabs-release-pc1-xenial.deb
-apt-get update
-apt-get install puppet-agent=1.5.2-1xenial
-hostnamectl set-hostname ${hostname}
-sed "1s/.*/127.0.0.1 ${fqdn} ${hostname} localhost/" /etc/hosts > tmp_hosts
-cp tmp_hosts /etc/hosts
-rm tmp_hosts
-echo "[main]" > /etc/puppetlabs/puppet/puppet.conf
-echo "server = puppet.prod.dhiprod.dhiaws.com" >> /etc/puppetlabs/puppet/puppet.conf
-echo "environment = ${account}_${environment}" >> /etc/puppetlabs/puppet/puppet.conf
-systemctl restart puppet.service
+yum update
+yum upgrade
+yum -y install perl-DateTime perl-Sys-Syslog openssl openssl-devel cpan unzip wget nano
 
 ${user_data}
   EOF
