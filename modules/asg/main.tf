@@ -1,4 +1,4 @@
-#######################
+######################
 # Launch configuration
 #######################
 resource "aws_launch_configuration" "this" {
