@@ -3,21 +3,34 @@ output "vpc_id" {
   description = "The ID of the VPC"
   value       = "${module.vpc.vpc_id}"
 }
-
-#CIDR
-output "cidr" {
-  description = "cide block for VPC"
-  value       = "${module.vpc.cidr}"
+output "owner" {
+  value       = "${var.owner}"
 }
+
+output "environment_level" {
+  value       = "${var.environment_level}"
+}
+
+output "cidr" {
+  value       = "${var.vpc_cidr}"
+}
+
+output "aws_account_name" {
+  value       = "${var.aws_account_name}"
+}
+
+output "product_brand" {
+  value       = "${var.product_brand}"
+}
+
+output "region" {
+  value       = "${var.region}"
+}
+
 # Subnets
 output "private_subnets" {
   description = "List of IDs of private subnets"
   value       = ["${module.vpc.private_subnets}"]
-}
-
-output "azs" {
-  value = ["${module.vpc.azs}"]
-
 }
 
 output "public_subnets" {
@@ -46,6 +59,3 @@ output "nat_public_ips" {
   value       = ["${module.vpc.nat_public_ips}"]
 }
 
-output "default_ami" {
-  value       = "${var.default_ami}"
-}

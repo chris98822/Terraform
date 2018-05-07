@@ -4,12 +4,11 @@ provider "aws" {
 }
 
 module "ec2" {
-  source = "../../../modules/single_ec2/"
+  source = "../../../../modules/single_ec2/"
 
 ################
 # Set Perameters
 ################
-  count                       = "1"
   name                        = "example"
   associate_public_ip_address = "false"
   instance_type               = "t2.micro"
@@ -34,9 +33,20 @@ module "ec2" {
 ####################################
 # Variables set in Variables.tf File
 ####################################
-  ami                         = "${var.ami}"
-  subnet_id                   = "${var.private_subnets[0]}" #pick 0-2 for subnet azs
-  vpc_security_group_ids      = "${var.private_sg}"
-  tags                        = "${merge(var.primary_tags, var.additional_tags)}"
+  ami                         = "ami-07eb707f" #Amazon Linux 2
+  subnet_id                   = "${module.vpc.public_subnets[0]}" #pick 0-2 for subnet azs
+  vpc_security_group_ids      = ["${module.security_groups.private_sg}"]
+
+  ########
+  # Tags
+  ########
+  tags = {
+    owner           = "${module.vpc.owner}"
+    account         = "${module.vpc.aws_account_name}"
+    product         = "${module.vpc.product_brand}"
+    environment     = "${module.vpc.environment_level}"
+    creator         = "terraform"
+    resource        = "single_ec2"
+  }
 
 }

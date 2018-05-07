@@ -1,16 +1,13 @@
-module "private_sg" {
-  source = "../../../modules/security_group/"
 
-  account_name          = "${var.account}"
-  account_long          = "${var.product}"
-  environment           = "${var.environment}"
-  vpc_id                = "${var.env_vpc_id}"
+
+resource "aws_security_group" "private_sg" {
+  vpc_id                = "${module.vpc.vpc_id}"
 
 
 ##############
 #Add Name Here
 ##############
-  sg_name               = "private"
+  name                  = "private_sg"
 
 
 ###################
@@ -20,7 +17,7 @@ module "private_sg" {
     from_port           = 22
     to_port             = 22
     protocol            = "tcp"
-    security_group_id   = "${output.private_sg_id.id}"
+    cidr_blocks   = ["${module.vpc.cidr}"]
   }
   egress {
     from_port           = 0
@@ -30,9 +27,13 @@ module "private_sg" {
   }
 
 
-  tags                  = "${merge(var.primary_tags, var.additional_tags)}"
+  tags = {
+    owner           = "${module.vpc.owner}"
+    account         = "${module.vpc.aws_account_name}"
+    product         = "${module.vpc.product_brand}"
+    environment     = "${module.vpc.environment_level}"
+    creator         = "terraform"
+    resource        = "security_group"
+  }
 }
 
-output "${module.private_sg.sg_name}_id" {
-  value = "${aws_security_group.private_sg.id}"
-}

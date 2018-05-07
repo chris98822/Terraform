@@ -1,17 +1,12 @@
-module "public_sg" {
-  source = "../../../modules/security_group/"
 
-  account_name          = "${var.account}"
-  account_long          = "${var.product}"
-  environment           = "${var.environment}"
-  vpc_id                = "${var.env_vpc_id}"
+resource "aws_security_group" "public_sg" {
+  vpc_id                = "${module.vpc.vpc_id}"
 
 
 ##############
 #Add Name and Description Here
 ##############
-  sg_name               = "public"
-  Description           = "Allow HTTP/S from Anywhere. Allow SSH internally"
+  name               = "public"
 
 ###################
 # Rules Here
@@ -42,9 +37,14 @@ module "public_sg" {
   }
 
 
-  tags                  = "${merge(var.primary_tags, var.additional_tags)}"
+  tags = {
+    owner           = "${module.vpc.owner}"
+    account         = "${module.vpc.aws_account_name}"
+    product         = "${module.vpc.product_brand}"
+    environment     = "${module.vpc.environment_level}"
+    creator         = "terraform"
+    resource        = "security_group"
+  }
 }
 
-output "${module.public_sg.sg_name}_id" {
-  value = "${aws_security_group.public_sg.id}"
-}
+

@@ -1,21 +1,8 @@
-provider "aws" {
-  region = "us-west-2"
-
-  /*# Make it faster by skipping something
-  skip_get_ec2_platforms      = true
-  skip_metadata_api_check     = true
-  skip_region_validation      = true
-  skip_credentials_validation = true
-  skip_requesting_account_id  = true
-*/
-}
-
-
 ######
 # Launch configuration and autoscaling group
 ######
 module "example_asg" {
-  source = "../../../modules/asg/"
+  source = "../../../../modules/asg/"
 
   name = "example-with-elb"
 
@@ -26,9 +13,9 @@ module "example_asg" {
 
   lc_name = "example-lc"
 
-  image_id        = "${var.ami}"
+  image_id        = "ami-07eb707f"
   instance_type   = "t2.micro"
-  security_groups = "${var.public_sg}"
+  security_groups = "${module.security_groups.public_sg}"
   load_balancers  = ["${module.elb.this_elb_id}"]
 
   ebs_block_device = [
@@ -49,26 +36,33 @@ module "example_asg" {
 
   # Auto scaling group
   asg_name                  = "example-asg"
-  vpc_zone_identifier       = "${var.public_subnets}"
+  vpc_zone_identifier       = "${module.vpc.public_subnets}"
   health_check_type         = "EC2"
   min_size                  = 0
   max_size                  = 1
   desired_capacity          = 1
   wait_for_capacity_timeout = 0
 
-  tags                        = "${merge(var.asg_primary_tags, var.asg_additional_tags)}"
+  tags = {
+  owner           = "${module.vpc.owner}"
+  account         = "${module.vpc.aws_account_name}"
+  product         = "${module.vpc.product_brand}"
+  environment     = "${module.vpc.environment_level}"
+  creator         = "terraform"
+  resource        = "auto_scaling_group"
+  }
 }
 
 ######
 # ELB
 ######
 module "elb" {
-  source = "../../../modules/elb/"
+  source = "../../../../modules/elb/"
 
   name = "elb-example"
 
-  subnets         = "${var.public_subnets}"
-  security_groups = "${var.public_sg}"
+  subnets         = "${module.vpc.public_subnets}"
+  security_groups = "${module.security_groups.public_sg}"
   internal        = false
 
   listener = [
@@ -90,5 +84,12 @@ module "elb" {
     },
   ]
 
- tags                        = "${merge(var.elb_primary_tags, var.elb_additional_tags)}"
+ tags = {
+  owner           = "${module.vpc.owner}"
+  account         = "${module.vpc.aws_account_name}"
+  product         = "${module.vpc.product_brand}"
+  environment     = "${module.vpc.environment_level}"
+  creator         = "terraform"
+  resource        = "load_balancer"
+ }
 }
