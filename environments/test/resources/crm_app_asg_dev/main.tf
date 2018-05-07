@@ -1,7 +1,3 @@
-###
-#Create Auto Scaling Group with Amazon Linux 2 behind an ELB
-###
-
 provider "aws" {
   region = "us-west-2"
 
@@ -11,44 +7,9 @@ provider "aws" {
   skip_region_validation      = true
   skip_credentials_validation = true
   skip_requesting_account_id  = true
-}*/
-
-##############################################################
-# Data sources to get VPC, subnets and security group details
-##############################################################
-data "aws_vpc" "default" {
-  default = true
+*/
 }
 
-data "aws_subnet_ids" "all" {
-  vpc_id = "${data.aws_vpc.default.id}"
-}
-
-data "aws_security_group" "default" {
-  vpc_id = "${data.aws_vpc.default.id}"
-  name   = "default"
-}
-
-#find Amazon Linux 2 LTS
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-
-  filter {
-    name = "name"
-
-    values = [
-      "amzn2-ami-hvm-*-x86_64-gp2",
-    ]
-  }
-
-  filter {
-    name = "owner-alias"
-
-    values = [
-      "amazon",
-    ]
-  }
-}
 
 ######
 # Launch configuration and autoscaling group
@@ -60,13 +21,14 @@ module "example_asg" {
 
   # Launch configuration
   #
-  # launch_configuration = "my-existing-launch-configuration" # Use the existing launch configuration
-  # create_lc = false # disables creation of launch configuration
+  # launch_configuration = "my-existing-launch-configuration" Use the existing launch configuration
+  # create_lc = false  disables creation of launch configuration
+
   lc_name = "example-lc"
 
-  image_id        = "${data.aws_ami.amazon_linux.id}"
+  image_id        = "${var.ami}"
   instance_type   = "t2.micro"
-  security_groups = ["${data.aws_security_group.default.id}"]
+  security_groups = "${var.public_sg}"
   load_balancers  = ["${module.elb.this_elb_id}"]
 
   ebs_block_device = [
@@ -87,7 +49,7 @@ module "example_asg" {
 
   # Auto scaling group
   asg_name                  = "example-asg"
-  vpc_zone_identifier       = ["${data.aws_subnet_ids.all.ids}"]
+  vpc_zone_identifier       = "${var.public_subnets}"
   health_check_type         = "EC2"
   min_size                  = 0
   max_size                  = 1
@@ -116,8 +78,8 @@ module "elb" {
 
   name = "elb-example"
 
-  subnets         = ["${data.aws_subnet_ids.all.ids}"]
-  security_groups = ["${data.aws_security_group.default.id}"]
+  subnets         = "${var.public_subnets}"
+  security_groups = "${var.public_sg}"
   internal        = false
 
   listener = [

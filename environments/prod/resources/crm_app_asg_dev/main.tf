@@ -1,12 +1,17 @@
+###
+#Create Auto Scaling Group with Amazon Linux 2 behind an ELB
+###
+
 provider "aws" {
   region = "us-west-2"
 
-  # Make it faster by skipping something
+  /*# Make it faster by skipping something
   skip_get_ec2_platforms      = true
   skip_metadata_api_check     = true
   skip_region_validation      = true
   skip_credentials_validation = true
   skip_requesting_account_id  = true
+*/
 }
 
 ##############################################################
@@ -25,6 +30,7 @@ data "aws_security_group" "default" {
   name   = "default"
 }
 
+#find Amazon Linux 2 LTS
 data "aws_ami" "amazon_linux" {
   most_recent = true
 
@@ -32,7 +38,7 @@ data "aws_ami" "amazon_linux" {
     name = "name"
 
     values = [
-      "amzn-ami-hvm-*-x86_64-gp2",
+      "amzn2-ami-hvm-*-x86_64-gp2",
     ]
   }
 
@@ -48,10 +54,10 @@ data "aws_ami" "amazon_linux" {
 ######
 # Launch configuration and autoscaling group
 ######
-module "example" {
-  source = "../../../modules/asg_lc/"
+module "example_asg" {
+  source = "../../../modules/asg/"
 
-  name = "example-with-ec2"
+  name = "example-with-elb"
 
   # Launch configuration
   #
@@ -59,25 +65,24 @@ module "example" {
   # create_lc = false # disables creation of launch configuration
   lc_name = "example-lc"
 
-  image_id                    = "${data.aws_ami.amazon_linux.id}"
-  instance_type               = "t2.micro"
-  security_groups             = ["${data.aws_security_group.default.id}"]
-  associate_public_ip_address = true
+  image_id        = "${data.aws_ami.amazon_linux.id}"
+  instance_type   = "t2.micro"
+  security_groups = ["${data.aws_security_group.default.id}"]
+  load_balancers  = ["${module.elb.this_elb_id}"]
 
   ebs_block_device = [
     {
       device_name           = "/dev/xvdz"
       volume_type           = "gp2"
-      volume_size           = "50"
+      volume_size           = "15"
       delete_on_termination = true
     },
   ]
 
   root_block_device = [
     {
-      volume_size           = "50"
-      volume_type           = "gp2"
-      delete_on_termination = true
+      volume_size = "15"
+      volume_type = "gp2"
     },
   ]
 
@@ -102,9 +107,41 @@ module "example" {
       propagate_at_launch = true
     },
   ]
+}
 
-  tags_as_map = {
-    extra_tag1 = "extra_value1"
-    extra_tag2 = "extra_value2"
+######
+# ELB
+######
+module "elb" {
+  source = "../../../modules/elb/"
+
+  name = "elb-example"
+
+  subnets         = ["${data.aws_subnet_ids.all.ids}"]
+  security_groups = ["${data.aws_security_group.default.id}"]
+  internal        = false
+
+  listener = [
+    {
+      instance_port     = "80"
+      instance_protocol = "HTTP"
+      lb_port           = "80"
+      lb_protocol       = "HTTP"
+    },
+  ]
+
+  health_check = [
+    {
+      target              = "HTTP:80/"
+      interval            = 30
+      healthy_threshold   = 2
+      unhealthy_threshold = 2
+      timeout             = 5
+    },
+  ]
+
+  tags = {
+    Owner       = "user"
+    Environment = "dev"
   }
 }
