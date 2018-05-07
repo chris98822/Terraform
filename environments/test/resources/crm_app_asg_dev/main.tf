@@ -56,18 +56,7 @@ module "example_asg" {
   desired_capacity          = 1
   wait_for_capacity_timeout = 0
 
-  tags = [
-    {
-      key                 = "Environment"
-      value               = "dev"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Project"
-      value               = "megasecret"
-      propagate_at_launch = true
-    },
-  ]
+  tags                        = "${merge(var.asg_primary_tags, var.asg_additional_tags)}"
 }
 
 ######
@@ -101,8 +90,5 @@ module "elb" {
     },
   ]
 
-  tags = {
-    Owner       = "user"
-    Environment = "dev"
-  }
+ tags                        = "${merge(var.elb_primary_tags, var.elb_additional_tags)}"
 }

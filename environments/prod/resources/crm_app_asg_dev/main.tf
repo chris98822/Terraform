@@ -10,12 +10,8 @@ provider "aws" {
   skip_metadata_api_check     = true
   skip_region_validation      = true
   skip_credentials_validation = true
-<<<<<<< HEAD:environments/prod/resources/crm_app_asg_dev/main.tf
   skip_requesting_account_id  = true
 */
-=======
-  skip_requesting_account_id  = true*/
->>>>>>> 85b8e943e1112b9d730f015b8b31031e87d0fb1d:environments/test/crm_app_asg_dev/main.tf
 }
 
 ##############################################################
