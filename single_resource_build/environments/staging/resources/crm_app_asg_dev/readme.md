@@ -1,0 +1,1 @@
+Have yet to build variables to use the VPC module subnets. Currently using default subnets.
