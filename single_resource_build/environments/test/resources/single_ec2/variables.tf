@@ -1,8 +1,3 @@
-#Load Environment VPC
-module "vpc" {
-    source = "../../vpc/"
-}
-
-module "security_groups" {
-    source = "../../security_groups/"
+provider "aws" {
+  region = "us-west-2"
 }

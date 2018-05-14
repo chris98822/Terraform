@@ -1,3 +1,11 @@
+provider "aws" {
+  region = "us-west-2"
+}
+
+terraform {
+  backend "s3" {}
+}
+
 #place holder
 module "vpc" {
     source = "vpc/"

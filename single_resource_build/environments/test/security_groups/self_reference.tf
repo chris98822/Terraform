@@ -1,5 +1,8 @@
+terraform {
+  backend "s3" {}
+}
 resource "aws_security_group" "self_reference" {
-  vpc_id                = "${module.vpc.vpc_id}"
+  vpc_id                = "${data.terraform_remote_state.vpc.vpc_id}"
 
 
 ##############
@@ -8,12 +11,13 @@ resource "aws_security_group" "self_reference" {
   name                  = "self_reference"
 
     tags = {
-        owner           = "${module.vpc.owner}"
-        account         = "${module.vpc.aws_account_name}"
-        product         = "${module.vpc.product_brand}"
-        environment     = "${module.vpc.environment_level}"
+        owner           = "${data.terraform_remote_state.vpc.owner}"
+        account         = "${data.terraform_remote_state.vpc.aws_account_name}"
+        product         = "${data.terraform_remote_state.vpc.product_brand}"
+        environment     = "${data.terraform_remote_state.vpc.environment_level}"
         creator         = "terraform"
         resource        = "security_group"
+        
     }
 }
 

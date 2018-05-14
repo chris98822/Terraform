@@ -1,6 +1,9 @@
+terraform {
+  backend "s3" {}
+}
 
 resource "aws_security_group" "public_sg" {
-  vpc_id                = "${module.vpc.vpc_id}"
+  vpc_id                = "${data.terraform_remote_state.vpc.vpc_id}"
 
 
 ##############
@@ -27,7 +30,7 @@ resource "aws_security_group" "public_sg" {
     from_port           = 22
     to_port             = 22
     protocol            = "tcp"
-    cidr_blocks         = ["${module.vpc.cidr}"]
+    cidr_blocks         = ["${data.terraform_remote_state.vpc.cidr}"]
   }
   egress {
     from_port           = 0
@@ -38,10 +41,10 @@ resource "aws_security_group" "public_sg" {
 
 
   tags = {
-    owner           = "${module.vpc.owner}"
-    account         = "${module.vpc.aws_account_name}"
-    product         = "${module.vpc.product_brand}"
-    environment     = "${module.vpc.environment_level}"
+    owner           = "${data.terraform_remote_state.vpc.owner}"
+    account         = "${data.terraform_remote_state.vpc.aws_account_name}"
+    product         = "${data.terraform_remote_state.vpc.product_brand}"
+    environment     = "${data.terraform_remote_state.vpc.environment_level}"
     creator         = "terraform"
     resource        = "security_group"
   }

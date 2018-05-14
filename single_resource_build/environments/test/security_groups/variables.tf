@@ -1,6 +1,3 @@
 provider "aws" {
-  region = "${module.vpc.region}"
-}
-module "vpc" {
-    source = "../vpc/"
+  region = "us-west-2"
 }
