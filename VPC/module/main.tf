@@ -82,7 +82,6 @@ resource "aws_route" "public_internet_gateway" {
 
 #################
 # Private routes
-# There are so many routing tables as the largest amount of subnets of each type (really?)
 #################
 resource "aws_route_table" "private" {
   count = "${var.create_vpc && local.max_subnet_length > 0 ? local.nat_gateway_count : 0}"
@@ -172,7 +171,7 @@ resource "aws_redshift_subnet_group" "redshift" {
 }
 
 #####################
-# ElastiCache subnet
+# ElastiCache/Search subnet
 #####################
 resource "aws_subnet" "elasticache" {
   count = "${var.create_vpc && length(var.elasticache_subnets) > 0 ? length(var.elasticache_subnets) : 0}"
@@ -195,14 +194,6 @@ resource "aws_elasticache_subnet_group" "elasticache" {
 ##############
 # NAT Gateway
 ##############
-# Workaround for interpolation not being able to "short-circuit" the evaluation of the conditional branch that doesn't end up being used
-# Source: https://github.com/hashicorp/terraform/issues/11566#issuecomment-289417805
-#
-# The logical expression would be
-#
-#    nat_gateway_ips = var.reuse_nat_ips ? var.external_nat_ip_ids : aws_eip.nat.*.id
-#
-# but then when count of aws_eip.nat.*.id is zero, this would throw a resource not found error on aws_eip.nat.*.id.
 locals {
   nat_gateway_ips = "${split(",", (var.reuse_nat_ips ? join(",", var.external_nat_ip_ids) : join(",", aws_eip.nat.*.id)))}"
 }
